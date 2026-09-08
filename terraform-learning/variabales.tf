@@ -7,8 +7,15 @@ variable "bucket_name" {
 
 
 variable "tags" {
-    type = map(string)
-    description = "project and owner name tag"
-    
-  
+  type        = map(string)
+  description = "project and owner name tag"
+
+
+}
+
+variable "owner" {
+
+  type        = string
+  description = "owner of the bucket"
+
 }

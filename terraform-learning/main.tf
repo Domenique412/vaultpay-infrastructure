@@ -1,4 +1,14 @@
 terraform {
+
+  backend "s3" {
+    bucket       = "domadmin-s3-terraform-state-029637202564-us-east-1-an"
+    key          = "terraform-learning/terraform.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
+
+  }
+
   required_version = "~> 1.16.0"
 
   required_providers {
@@ -13,18 +23,11 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "domadmin-tf-learning-bucket" {
-  bucket = "${var.bucket_name}-tf-learning-bucket"
+module "bucket" {
 
-  tags = var.tags
+  source = "./modules"
 
+  bucket_name = var.bucket_name
+  Environment = "dev"
 
-}
-
-resource "aws_s3_bucket_versioning" "domadmin-tf-learning-bucket" {
-  bucket = aws_s3_bucket.domadmin-tf-learning-bucket.id
-
-  versioning_configuration {
-    status = "Enabled"
-  }
 }
