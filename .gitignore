@@ -4,6 +4,7 @@
 # Terraform state and backups
 *.tfstate
 *.tfstate.*
+*tf-backend-plan
 
 # Local variable values
 *.tfvars
@@ -31,6 +32,9 @@ terraform.rc
 .env
 .env.*
 !.env.example
+
+
+
 
 # Private key files
 *.pem
