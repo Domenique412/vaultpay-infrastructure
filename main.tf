@@ -12,8 +12,9 @@ terraform {
   }
 }
 
-resource "aws_vpc" "this" {
-  cidr_block = "10.0.0.0/20"
+resource "aws_vpc" "main" {
+
+  cidr_block = var.main-vpc
 
   enable_dns_hostnames = true
 
@@ -25,4 +26,26 @@ resource "aws_vpc" "this" {
   }
 
 }
+
+list "aws_subnet" "vaultpay-public-subnet-a" {
+
+
+  config {
+    filter {
+      name   = "tag:Project"
+      values = ["VaultPay"]
+    }
+
+    filter {
+      name   = "tag:Name"
+      values = "vaultpay-public-subnet-a"
+    }
+
+    filter {
+      cidr_block = var.pub-subnet-a
+    }
+  }
+}
+
+
 
