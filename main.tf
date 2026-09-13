@@ -27,25 +27,10 @@ resource "aws_vpc" "main" {
 
 }
 
-list "aws_subnet" "vaultpay-public-subnet-a" {
+resource "aws_subnet" "public-a" {
+
+vpc_id = aws_vpc.main.id
 
 
-  config {
-    filter {
-      name   = "tag:Project"
-      values = ["VaultPay"]
-    }
-
-    filter {
-      name   = "tag:Name"
-      values = "vaultpay-public-subnet-a"
-    }
-
-    filter {
-      cidr_block = var.pub-subnet-a
-    }
-  }
 }
-
-
 
