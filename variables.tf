@@ -16,3 +16,11 @@ variable "pub-subnet-b" {
 
 }
 
+variable "pub-route" {
+  type        = string
+  description = "Address for public route in igw"
+
+}
+
+
+
