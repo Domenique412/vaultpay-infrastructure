@@ -23,4 +23,26 @@ variable "pub-route" {
 }
 
 
+variable "private-a-app" {
+  type        = string
+  description = "Address for private subnet application A"
 
+}
+
+variable "private-a-db" {
+  type        = string
+  description = "Address for private subnet database A"
+
+}
+
+variable "private-b-app" {
+  type        = string
+  description = "Address for private subnet application B"
+
+}
+
+variable "private-b-db" {
+  type        = string
+  description = "Address for private subnet database A"
+
+}
