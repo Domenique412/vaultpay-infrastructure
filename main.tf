@@ -28,9 +28,22 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "public-a" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = var.pub-subnet-a
+  availability_zone =  "us-east-1a"
+  tags = {
+    Name    = "vaultpay-public-subnet-a"
+    Project = "VaultPay"
+  }
+}
 
-vpc_id = aws_vpc.main.id
-
-
+resource "aws_subnet" "public-b" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = var.pub-subnet-b
+   availability_zone =  "us-east-1b"
+  tags = {
+    Name    = "vaultpay-public-subnet-b"
+    Project = "VaultPay"
+  }
 }
 
