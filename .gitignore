@@ -33,7 +33,8 @@ terraform.rc
 .env.*
 !.env.example
 
-
+# Syntax guide and run sheet
+lab-sheet.js
 
 
 # Private key files

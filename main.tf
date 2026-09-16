@@ -9,11 +9,17 @@ terraform {
   }
 }
 
+provider "aws" {
+
+  region = "us-east-1"
+
+}
+
 
 module "vpc" {
-    source = "./modules/vpc"
+  source = "./modules/vpc"
 
-main-vpc      = var.main-vpc
+  main-vpc      = var.main-vpc
   pub-subnet-a  = var.pub-subnet-a
   pub-subnet-b  = var.pub-subnet-b
   pub-route     = var.pub-route
@@ -21,6 +27,6 @@ main-vpc      = var.main-vpc
   private-a-db  = var.private-a-db
   private-b-app = var.private-b-app
   private-b-db  = var.private-b-db
-  project_name = var.project_name
-  
+  project_name  = var.project_name
+
 }
