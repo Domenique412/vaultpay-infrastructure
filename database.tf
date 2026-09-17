@@ -29,3 +29,43 @@ resource "aws_security_group" "rds" {
 
   }
 }
+
+resource "aws_db_instance" "vaultpay" {
+
+  # General settings
+  allocated_storage = 20
+  identifier        = "${var.project_name}-db"
+  engine            = "postgres"
+  engine_version    = "18.1"
+  instance_class    = "db.t4g.micro"
+  db_name           = var.db_name
+
+  # Credentials
+  username                    = var.db_username
+  manage_master_user_password = true
+
+
+  # Storage 
+  storage_type      = "gp3"
+  storage_encrypted = true
+
+  # Network Access
+  db_subnet_group_name   = aws_db_subnet_group.vaultpay.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
+  publicly_accessible    = false
+
+  # Environment settings (hardcoded)
+  multi_az                = false
+  backup_retention_period = 1
+  skip_final_snapshot     = true
+  deletion_protection     = false
+
+  tags = {
+    Name    = "${var.project_name}-db-instance"
+    Project = var.project_name
+
+  }
+
+
+
+}
