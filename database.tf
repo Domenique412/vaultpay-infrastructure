@@ -55,10 +55,10 @@ resource "aws_db_instance" "vaultpay" {
   publicly_accessible    = false
 
   # Environment settings (hardcoded)
-  multi_az                = false
-  backup_retention_period = 1
-  skip_final_snapshot     = true
-  deletion_protection     = false
+  multi_az                = var.multi_az
+  backup_retention_period = var.backup_retention_period
+  skip_final_snapshot     = var.skip_final_snapshot
+  deletion_protection     = var.deletion_protection
 
   tags = {
     Name    = "${var.project_name}-db-instance"
