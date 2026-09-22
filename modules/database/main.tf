@@ -1,6 +1,6 @@
 resource "aws_db_subnet_group" "vaultpay" {
   name        = "vaultpay-db-subnet-group"
-  subnet_ids  = module.vpc.db_private_subnet_ids
+  subnet_ids  = var.db_private_subnet_ids
   description = "Subnets for VaultPay RDS placement"
   tags = {
     Name    = "${var.project_name}-db-subnet-group"
@@ -12,7 +12,7 @@ resource "aws_db_subnet_group" "vaultpay" {
 resource "aws_security_group" "rds" {
   name        = "vaultpay-rds-security-group"
   description = "Security group for VaultPay RDS"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = var.vpc_id
 
   egress {
 
@@ -22,6 +22,13 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
 
   }
+
+  ingress {
+  from_port   = 5432
+  to_port     = 5432
+  protocol    = "tcp"
+  cidr_blocks = var.app_private_subnet_cidrs
+}
 
   tags = {
     Name    = "${var.project_name}-rds-security-group"

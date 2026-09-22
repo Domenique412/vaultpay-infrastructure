@@ -1,3 +1,20 @@
+
+
+
+
+variable "project_name" {
+  type        = string
+  description = "Tags for the project and name"
+
+}
+
+variable "app_private_subnet_cidrs" {
+  type        = list(string)
+  description = "Application private subnet ip addresses"
+
+}
+
+
 variable "db_name" {
   type        = string
   description = "The database name for the current instance"
@@ -29,6 +46,15 @@ variable "deletion_protection" {
 
 }
 
+variable "vpc_id" {
+  type        = string
+  description = "Network identifier supplied by the parent module"
+}
+
+variable "db_private_subnet_ids" {
+  type        = list(string)
+  description = "Database private subnet identifiers supplied by the parent module"
+}
 
 
  
