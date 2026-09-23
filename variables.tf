@@ -91,6 +91,16 @@ variable "deletion_protection" {
 
 }
 
+variable "ecr_force_delete" {
+  description = "When true, terraform destroy will delete the ECR repository even if it contains an image"
+  type        = bool
+  default     = false
+
+}
 
 
- 
+variable "s3_force_destroy" {
+  description = "When true, terraform destroy will delete the s3 bucket even if it contains objects"
+  type        = bool
+  default     = false
+}
