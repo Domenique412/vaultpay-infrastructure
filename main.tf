@@ -82,3 +82,40 @@ resource "aws_s3_bucket_public_access_block" "vaultpay-pab" {
 
 
 }
+
+resource "aws_iam_instance_profile" "vaultpay" {
+  name = var.project_name
+  role = aws_iam_role.vaultpay.name
+
+tags = {
+  Name = "${var.project_name}-instance-profile"
+  Project = var.project_name
+
+}
+}
+
+
+resource "aws_iam_role" "vaultpay" {
+assume_role_policy = {
+    Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+
+  
+}
+
+      tags = {
+  Name = "${var.project_name}-iam-role"
+  Project = var.project_name
+
+}
+}
+
+resource "aws_iam_policy_attachment" "vaultpay-attachment" {
+  name       = "vaultpay-attachment"
+  
+  roles      = [aws_iam_role.vaultpay.name]
+
+  policy_arn = aws_iam_policy.policy.arn
+}
+
