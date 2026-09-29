@@ -83,47 +83,47 @@ resource "aws_s3_bucket_public_access_block" "vaultpay-pab" {
 
 }
 
-resource "aws_iam_instance_profile" "vaultpay" {
-  name = var.project_name
-  role = aws_iam_role.vaultpay.name
-
-tags = {
-  Name = "${var.project_name}-instance-profile"
-  Project = var.project_name
-
-}
-}
 
 
-resource "aws_iam_role" "vaultpay" {
-name = var.project_name
-   
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+resource "aws_iam_role" "app" {
+  name               = "${var.project_name}-app-role"
+  description        = "IAM role assumed by VaultPay EC2 instance"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 
+  tags = {
+    Name    = "${var.project_name}-app-role"
+    Project = var.project_name
 
-      tags = {
-  Name = "${var.project_name}-iam-role"
-  Project = var.project_name
-
-}
+  }
 }
 
-resource "aws_iam_policy_attachment" "vaultpay-attachment" {
-  name       = "vaultpay-attachment"
-  
-  roles      = [aws_iam_role.vaultpay.name]
+resource "aws_iam_role_policy_attachment" "ecr_read" {
+  role       = aws_iam_role.app.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 
-  policy_arn = aws_iam_policy.policy.arn
+
 }
 
+resource "aws_iam_role_policy_attachment" "ssm_core" {
+  role       = aws_iam_role.app.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+
+resource "aws_iam_role_policy" "app_runtime" {
+  name   = "${var.project_name}-app-runtime"
+  role   = aws_iam_role.app.id
+  policy = data.aws_iam_policy_document.app_runtime.json
+
+}
+
+resource "aws_iam_instance_profile" "app" {
+  name = "${var.project_name}-app-profile"
+  role = aws_iam_role.app.name
+
+  tags = {
+    Name    = "${var.project_name}-app-profile"
+    Project = var.project_name
+
+  }
+}
