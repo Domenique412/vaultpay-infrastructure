@@ -10,7 +10,7 @@ resource "aws_db_subnet_group" "vaultpay" {
 }
 
 resource "aws_security_group" "rds" {
-  name        = "vaultpay-rds-security-group"
+  name        = "${var.project_name}-rds-security-group"
   description = "Security group for VaultPay RDS"
   vpc_id      = var.vpc_id
 
@@ -24,11 +24,11 @@ resource "aws_security_group" "rds" {
   }
 
   ingress {
-  from_port   = 5432
-  to_port     = 5432
-  protocol    = "tcp"
-  cidr_blocks = var.app_private_subnet_cidrs
-}
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = var.app_private_subnet_cidrs
+  }
 
   tags = {
     Name    = "${var.project_name}-rds-security-group"
@@ -44,7 +44,7 @@ resource "aws_db_instance" "vaultpay" {
   identifier        = "${var.project_name}-db"
   engine            = "postgres"
   engine_version    = "18.1"
-  instance_class    = "db.t4g.micro"
+  instance_class    = "db.t3.micro"
   db_name           = var.db_name
 
   # Credentials
@@ -53,7 +53,7 @@ resource "aws_db_instance" "vaultpay" {
 
 
   # Storage 
-  storage_type      = "gp3"
+  storage_type      = "gp2"
   storage_encrypted = true
 
   # Network Access

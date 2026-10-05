@@ -48,7 +48,7 @@ variable "private-b-db" {
 }
 
 variable "project_name" {
-  type = string
+  type        = string
   description = "Tags for the project and name"
-  
+
 }
