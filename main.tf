@@ -46,6 +46,15 @@ module "database" {
   vpc_id                   = module.vpc.vpc_id
   db_private_subnet_ids    = module.vpc.db_private_subnet_ids
 }
+
+module "alb" {
+  source = "./modules/alb"
+
+  vpc_id = module.vpc.vpc_id
+  project_name = var.project_name
+  public_subnet_ids = module.vpc.public_subnet_ids
+}
+
 resource "aws_ecr_repository" "vaultpay" {
   name         = var.project_name
   force_delete = var.ecr_force_delete
