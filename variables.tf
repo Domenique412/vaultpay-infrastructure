@@ -104,3 +104,9 @@ variable "s3_force_destroy" {
   type        = bool
   default     = false
 }
+
+variable "image_tag" {
+  description = "Container image tag to deploy."
+  type        = string
+  default     = "latest"
+}

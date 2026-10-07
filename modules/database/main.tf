@@ -53,7 +53,7 @@ resource "aws_db_instance" "vaultpay" {
 
 
   # Storage 
-  storage_type      = "gp2"
+  storage_type      = "gp3"
   storage_encrypted = true
 
   # Network Access

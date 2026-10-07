@@ -6,3 +6,8 @@ output "alb_dns_name" {
     value = aws_lb.vaultpay.dns_name
   
 }
+ output "sg_alb_id" {
+    description = "The Identifier of the Application LB Security Group "
+    value = aws_security_group.alb.id
+   
+ }

@@ -2,6 +2,10 @@ data "aws_caller_identity" "current" {
 
 }
 
+data "aws_region" "current" {
+
+}
+
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -26,5 +30,10 @@ data "aws_iam_policy_document" "app_runtime" {
     actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.runtime.arn}/reports/*"]
   }
+
+}
+
+data "aws_ssm_parameter" "ami_id" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64"
 
 }
