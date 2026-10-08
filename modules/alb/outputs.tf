@@ -11,3 +11,9 @@ output "alb_dns_name" {
     value = aws_security_group.alb.id
    
  }
+
+ output "alb_tg_id" {
+  description = "The Application Load Balancer Target group Identifier"
+  value = aws_lb_target_group.alb-tg.id
+  
+}

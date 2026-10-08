@@ -167,32 +167,59 @@ resource "aws_security_group" "app" {
   }
 }
 
-resource "aws_launch_template" "app-sg" {
-  image_id = data.aws_ssm_parameter.ami_id.value
+resource "aws_launch_template" "app" {
+  image_id      = data.aws_ssm_parameter.ami_id.value
   instance_type = "t4g.small"
   iam_instance_profile {
     name = aws_iam_instance_profile.app.name
   }
   vpc_security_group_ids = [aws_security_group.app.id]
-  name_prefix = "${var.project_name}-app-sg"
+  name_prefix            = "${var.project_name}-app"
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "${var.project_name}-app-lt"
+      Name    = "${var.project_name}-app"
       Project = var.project_name
     }
   }
 
+
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-  aws_region           = data.aws_region.current.region
-  ecr_registry         = split("/", aws_ecr_repository.vaultpay.repository_url)[0]
-  ecr_repository_url   = aws_ecr_repository.vaultpay.repository_url
-  image_tag            = var.image_tag
-  db_master_secret_arn =  module.database.db_master_secret_arn
-  db_host              = split(":", module.database.db_endpoint)[0]
-  db_port              =  module.database.db_port
-  db_name              =  module.database.db_name
-  artifact_bucket_name = aws_s3_bucket.runtime.id
-}))
-  
+    aws_region           = data.aws_region.current.region
+    ecr_registry         = split("/", aws_ecr_repository.vaultpay.repository_url)[0]
+    ecr_repository_url   = aws_ecr_repository.vaultpay.repository_url
+    image_tag            = var.image_tag
+    db_master_secret_arn = module.database.db_master_secret_arn
+    db_host              = split(":", module.database.db_endpoint)[0]
+    db_port              = module.database.db_port
+    db_name              = module.database.db_name
+    artifact_bucket_name = aws_s3_bucket.runtime.id
+  }))
+
+}
+
+
+resource "aws_autoscaling_group" "app_asg" {
+
+  name                      = "${var.project_name}-app-asg"
+  max_size                  = 2
+  min_size                  = 2
+  desired_capacity          = 2
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  vpc_zone_identifier       = module.vpc.app_private_subnet_ids
+  target_group_arns = [module.alb.alb_tg_id]
+
+  launch_template {
+    id = aws_launch_template.app.id
+    version = aws_launch_template.app.latest_version
+  }
+
+  tag {
+    key                 = "Project"
+    value               = var.project_name
+    propagate_at_launch = true
+
+
+  }
 }
