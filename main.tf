@@ -35,16 +35,16 @@ module "database" {
 
   source = "./modules/database"
 
-  multi_az                 = var.multi_az
-  project_name             = var.project_name
-  app_private_subnet_cidrs = var.app_private_subnet_cidrs
-  db_name                  = var.db_name
-  db_username              = var.db_name
-  backup_retention_period  = var.backup_retention_period
-  skip_final_snapshot      = var.skip_final_snapshot
-  deletion_protection      = var.deletion_protection
-  vpc_id                   = module.vpc.vpc_id
-  db_private_subnet_ids    = module.vpc.db_private_subnet_ids
+  multi_az                = var.multi_az
+  project_name            = var.project_name
+  app_security_group_id   = aws_security_group.app.id
+  db_name                 = var.db_name
+  db_username             = var.db_name
+  backup_retention_period = var.backup_retention_period
+  skip_final_snapshot     = var.skip_final_snapshot
+  deletion_protection     = var.deletion_protection
+  vpc_id                  = module.vpc.vpc_id
+  db_private_subnet_ids   = module.vpc.db_private_subnet_ids
 }
 
 module "alb" {
@@ -208,10 +208,10 @@ resource "aws_autoscaling_group" "app_asg" {
   health_check_grace_period = 300
   health_check_type         = "ELB"
   vpc_zone_identifier       = module.vpc.app_private_subnet_ids
-  target_group_arns = [module.alb.alb_tg_id]
+  target_group_arns         = [module.alb.alb_tg_id]
 
   launch_template {
-    id = aws_launch_template.app.id
+    id      = aws_launch_template.app.id
     version = aws_launch_template.app.latest_version
   }
 

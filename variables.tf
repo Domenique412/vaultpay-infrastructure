@@ -53,11 +53,6 @@ variable "project_name" {
 
 }
 
-variable "app_private_subnet_cidrs" {
-  type        = list(string)
-  description = "Application private subnet ip addresses"
-
-}
 
 
 variable "db_name" {
@@ -110,3 +105,4 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+

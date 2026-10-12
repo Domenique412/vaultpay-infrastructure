@@ -8,10 +8,9 @@ variable "project_name" {
 
 }
 
-variable "app_private_subnet_cidrs" {
-  type        = list(string)
-  description = "Application private subnet ip addresses"
-
+variable "app_security_group_id" {
+  type        = string
+  description = "ID of the security group attached to the application instances"
 }
 
 
