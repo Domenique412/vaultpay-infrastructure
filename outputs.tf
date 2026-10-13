@@ -1,16 +1,14 @@
-output "ecr_repository_url" {
-  description = "URL of the ECR repository holding the VaultPay container image"
-  value       = aws_ecr_repository.vaultpay.repository_url
+output "alb_dns_name" {
+  description = "DNS name of the application load balancer"
+  value       = module.app.alb_dns_name
+}
 
+output "ecr_repository_url" {
+  description = "URL of the VaultPay ECR repository"
+  value       = module.app.ecr_repository_url
 }
 
 output "runtime_bucket_name" {
-  description = "Name of the s3 bucket holding VaultPay runtime data"
-  value       = aws_s3_bucket.runtime.id
-
-}
-
-output "alb_dns_name" {
-  description = "DNS name of the application load balancer"
-  value       = module.alb.alb_dns_name
+  description = "Name of the VaultPay runtime bucket"
+  value       = module.app.runtime_bucket_name
 }

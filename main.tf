@@ -47,95 +47,25 @@ module "database" {
   db_private_subnet_ids   = module.vpc.db_private_subnet_ids
 }
 
-module "alb" {
-  source = "./modules/alb"
+module "app" {
 
-  vpc_id            = module.vpc.vpc_id
-  project_name      = var.project_name
-  public_subnet_ids = module.vpc.public_subnet_ids
-}
+  source = "./modules/application"
 
-resource "aws_ecr_repository" "vaultpay" {
-  name         = var.project_name
-  force_delete = var.ecr_force_delete
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-
-  tags = {
-    Name    = "${var.project_name}-ecr"
-    Project = var.project_name
-  }
-}
-
-resource "aws_s3_bucket" "runtime" {
-  bucket        = "${data.aws_caller_identity.current.account_id}-${var.project_name}-runtime"
-  force_destroy = var.s3_force_destroy
-
-  tags = {
-    Name    = "${var.project_name}-runtime"
-    Project = var.project_name
-  }
-
-}
-
-resource "aws_s3_bucket_public_access_block" "vaultpay-pab" {
-  bucket = aws_s3_bucket.runtime.id
-
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-
-
+  app_private_subnet_ids = module.vpc.app_private_subnet_ids
+  vpc_id                 = module.vpc.vpc_id
+  project_name           = var.project_name
+  public_subnet_ids      = module.vpc.public_subnet_ids
+  image_tag              = var.image_tag
+  db_master_secret_arn   = module.database.db_master_secret_arn
+  db_name                = module.database.db_name
+  db_endpoint            = module.database.db_endpoint
+  db_port                = module.database.db_port
+  app_security_group_id  = aws_security_group.app.id
+  ecr_force_delete       = var.ecr_force_delete
+  s3_force_destroy       = var.s3_force_destroy
 }
 
 
-
-resource "aws_iam_role" "app" {
-  name               = "${var.project_name}-app-role"
-  description        = "IAM role assumed by VaultPay EC2 instance"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
-
-  tags = {
-    Name    = "${var.project_name}-app-role"
-    Project = var.project_name
-
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "ecr_read" {
-  role       = aws_iam_role.app.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-
-
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_core" {
-  role       = aws_iam_role.app.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-
-resource "aws_iam_role_policy" "app_runtime" {
-  name   = "${var.project_name}-app-runtime"
-  role   = aws_iam_role.app.id
-  policy = data.aws_iam_policy_document.app_runtime.json
-
-}
-
-resource "aws_iam_instance_profile" "app" {
-  name = "${var.project_name}-app-profile"
-  role = aws_iam_role.app.name
-
-  tags = {
-    Name    = "${var.project_name}-app-profile"
-    Project = var.project_name
-
-  }
-}
 
 resource "aws_security_group" "app" {
   name        = "${var.project_name}-app-security-group"
@@ -151,15 +81,6 @@ resource "aws_security_group" "app" {
 
   }
 
-  ingress {
-    description     = "HTTP from ALB security group"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [module.alb.sg_alb_id]
-
-  }
-
   tags = {
     Name    = "${var.project_name}-app-security-group"
     Project = var.project_name
@@ -167,59 +88,13 @@ resource "aws_security_group" "app" {
   }
 }
 
-resource "aws_launch_template" "app" {
-  image_id      = data.aws_ssm_parameter.ami_id.value
-  instance_type = "t4g.small"
-  iam_instance_profile {
-    name = aws_iam_instance_profile.app.name
-  }
-  vpc_security_group_ids = [aws_security_group.app.id]
-  name_prefix            = "${var.project_name}-app"
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name    = "${var.project_name}-app"
-      Project = var.project_name
-    }
-  }
-
-
-  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    aws_region           = data.aws_region.current.region
-    ecr_registry         = split("/", aws_ecr_repository.vaultpay.repository_url)[0]
-    ecr_repository_url   = aws_ecr_repository.vaultpay.repository_url
-    image_tag            = var.image_tag
-    db_master_secret_arn = module.database.db_master_secret_arn
-    db_host              = split(":", module.database.db_endpoint)[0]
-    db_port              = module.database.db_port
-    db_name              = module.database.db_name
-    artifact_bucket_name = aws_s3_bucket.runtime.id
-  }))
-
+resource "aws_vpc_security_group_ingress_rule" "alb_to_app" {
+  security_group_id            = aws_security_group.app.id
+  referenced_security_group_id = module.app.alb_security_group_id
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+  description                  = "HTTP from the application load balancer"
 }
 
 
-resource "aws_autoscaling_group" "app_asg" {
-
-  name                      = "${var.project_name}-app-asg"
-  max_size                  = 2
-  min_size                  = 2
-  desired_capacity          = 2
-  health_check_grace_period = 300
-  health_check_type         = "ELB"
-  vpc_zone_identifier       = module.vpc.app_private_subnet_ids
-  target_group_arns         = [module.alb.alb_tg_id]
-
-  launch_template {
-    id      = aws_launch_template.app.id
-    version = aws_launch_template.app.latest_version
-  }
-
-  tag {
-    key                 = "Project"
-    value               = var.project_name
-    propagate_at_launch = true
-
-
-  }
-}
