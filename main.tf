@@ -39,7 +39,7 @@ module "database" {
   project_name            = var.project_name
   app_security_group_id   = aws_security_group.app.id
   db_name                 = var.db_name
-  db_username             = var.db_name
+  db_username             = var.db_username
   backup_retention_period = var.backup_retention_period
   skip_final_snapshot     = var.skip_final_snapshot
   deletion_protection     = var.deletion_protection
@@ -47,7 +47,7 @@ module "database" {
   db_private_subnet_ids   = module.vpc.db_private_subnet_ids
 }
 
-module "app" {
+module "application" {
 
   source = "./modules/application"
 
@@ -90,7 +90,7 @@ resource "aws_security_group" "app" {
 
 resource "aws_vpc_security_group_ingress_rule" "alb_to_app" {
   security_group_id            = aws_security_group.app.id
-  referenced_security_group_id = module.app.alb_security_group_id
+  referenced_security_group_id = module.application.alb_security_group_id
   from_port                    = 80
   to_port                      = 80
   ip_protocol                  = "tcp"
